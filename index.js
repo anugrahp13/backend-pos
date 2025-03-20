@@ -10,6 +10,9 @@ const bodyParser = require('body-parser')
 //import path
 const path = require('path')
 
+//import router
+const router = require('./routes')
+
 //init app
 const app = express()
 
@@ -34,6 +37,9 @@ app.get('/', (req, res) => {
 app.get('/uploads/:filename', (req, res) => {
   res.sendFile(path.join(__dirname, 'uploads', req.params.filename));
 });
+
+//define routes
+app.use('/api', router);
 
 //start server
 app.listen(port, () => {
