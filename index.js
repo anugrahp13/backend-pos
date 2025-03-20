@@ -7,6 +7,9 @@ const cors = require('cors')
 //import bodyParser
 const bodyParser = require('body-parser')
 
+//import path
+const path = require('path')
+
 //init app
 const app = express()
 
@@ -26,6 +29,11 @@ const port = 3000;
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
+
+// Route to serve uploaded files (if needed)
+app.get('/uploads/:filename', (req, res) => {
+  res.sendFile(path.join(__dirname, 'uploads', req.params.filename));
+});
 
 //start server
 app.listen(port, () => {
