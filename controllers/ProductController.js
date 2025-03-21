@@ -344,6 +344,76 @@ const deleteProduct = async (req, res) => {
     }
 };
 
+// Fungsi findProductByCategoryId untuk mengambil produk berdasarkan category ID
+const findProductByCategoryId = async (req, res) => {
+    // Mengambil ID dari parameter
+    const { id } = req.params;
+
+    try {
+        // Mengambil nilai halaman dan limit dari parameter query, dengan nilai default
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
+
+        // Mengambil produk berdasarkan category ID
+        const products = await prisma.product.findMany({
+            where: {
+                category_id: Number(id),
+            },
+            select: {
+                id: true,
+                barcode: true,
+                title: true,
+                description: true,
+                buy_price: true,
+                sell_price: true,
+                stock: true,
+                image: true,
+                category_id: true,
+                created_at: true,
+                updated_at: true,
+            },
+            skip: skip,
+            take: limit,
+        });
+
+        // Mengambil jumlah total produk untuk paginasi
+        const totalProducts = await prisma.product.count({
+            where: {
+                category_id: Number(id), // Hitung produk berdasarkan category ID
+            },
+        });
+
+        // Menghitung total halaman
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        // Mengirim respons
+        res.status(200).send({
+            meta: {
+                success: true,
+                message: `Berhasil mengambil produk dengan category ID: ${id}`,
+            },
+            data: products,
+            pagination: {
+                currentPage: page,
+                totalPages: totalPages,
+                perPage: limit,
+                total: totalProducts,
+            },
+        });
+
+    } catch (error) {
+        // Mengirim respons jika terjadi kesalahan
+        res.status(500).send({
+            meta: {
+                success: false,
+                message: "Kesalahan internal server",
+            },
+            errors: error,
+        });
+    }
+};
+
 
 // Mengekspor fungsi-fungsi untuk digunakan di file lain
-module.exports = { findProducts, createProduct, findProductById, updateProduct, deleteProduct };
+module.exports = { findProducts, createProduct, findProductById, updateProduct, deleteProduct, findProductByCategoryId };
