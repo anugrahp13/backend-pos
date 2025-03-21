@@ -41,6 +41,7 @@ const routes = [
   { method: 'put', path: '/products/:id', middlewares: [verifyToken, upload.single('image'), validateProduct, handleValidationErrors], handler: productController.updateProduct },
   { method: 'delete', path: '/products/:id', middlewares: [verifyToken], handler: productController.deleteProduct },
   { method: 'get', path: '/products-by-category/:id', middlewares: [verifyToken], handler: productController.findProductByCategoryId },
+  { method: 'post', path: '/products-by-barcode', middlewares: [verifyToken], handler: productController.findProductByBarcode },
 ];
 
 // Helper function to create routes
