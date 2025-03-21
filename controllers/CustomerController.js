@@ -275,5 +275,51 @@ const deleteCustomer = async (req, res) => {
     }
 };
 
+// Fungsi allCustomers
+const allCustomers = async (req, res) => {
+    try {
+
+        // Mendapatkan data pelanggan
+        const customers = await prisma.customer.findMany({
+            select: {
+                id: true,
+                name: true,
+            },
+            orderBy: {
+                id: "desc",
+            }
+        });
+
+        // Map the customers to the desired format
+        const formattedCustomers = customers.map(customer => ({
+            value: customer.id,
+            label: customer.name
+        }));
+
+        // Mengirimkan respons
+        res.status(200).send({
+            // Meta untuk respons JSON
+            meta: {
+                success: true,
+                message: "Berhasil mendapatkan semua pelanggan",
+            },
+            // Data pelanggan
+            data: formattedCustomers,
+        });
+
+    } catch (error) {
+        // Jika terjadi kesalahan, kirimkan respons dengan pesan error
+        res.status(500).send({
+            // Meta untuk respons JSON
+            meta: {
+                success: false,
+                message: "Terjadi kesalahan di server",
+            },
+            // Data error
+            errors: error,
+        });
+    }
+};
+
 // Mengekspor fungsi-fungsi untuk digunakan di modul lain
-module.exports = { findCustomers, createCustomer, findCustomerById, updateCustomer, deleteCustomer };
+module.exports = { findCustomers, createCustomer, findCustomerById, updateCustomer, deleteCustomer, allCustomers };
