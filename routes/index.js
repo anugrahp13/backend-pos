@@ -66,6 +66,7 @@ const routes = [
 
   // Sales routes
   { method: 'get', path: '/sales', middlewares: [verifyToken, validateSales, handleValidationErrors], handler: salesController.filterSales },
+  { method: 'get', path: '/sales/export', middlewares: [verifyToken, validateSales, handleValidationErrors], handler: salesController.exportSales },
 ];
 
 // Helper function to create routes
