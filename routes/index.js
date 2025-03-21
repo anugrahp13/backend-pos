@@ -61,6 +61,7 @@ const routes = [
 
   // Transaction routes
   { method: 'post', path: '/transactions', middlewares: [verifyToken, validateTransaction, handleValidationErrors], handler: transactionController.createTransaction },
+  { method: 'get', path: '/transactions', middlewares: [verifyToken], handler: transactionController.findTransactionByInvoice },
 ];
 
 // Helper function to create routes
