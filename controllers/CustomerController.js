@@ -221,5 +221,59 @@ const updateCustomer = async (req, res) => {
     }
 };
 
+// Fungsi deleteCustomer untuk menghapus pelanggan
+const deleteCustomer = async (req, res) => {
+    // Mendapatkan ID dari parameter
+    const { id } = req.params;
+
+    try {
+        // Mendapatkan data pelanggan yang akan dihapus
+        const customer = await prisma.customer.findUnique({
+            where: {
+                id: Number(id),
+            },
+        });
+
+        // Jika pelanggan tidak ditemukan, kirimkan respons 404
+        if (!customer) {
+            return res.status(404).send({
+                // Meta untuk respons JSON
+                meta: {
+                    success: false,
+                    message: `Pelanggan dengan ID: ${id} tidak ditemukan`,
+                },
+            });
+        }
+
+        // Menghapus pelanggan berdasarkan ID
+        await prisma.customer.delete({
+            where: {
+                id: Number(id),
+            },
+        });
+
+        // Mengirimkan respons setelah berhasil menghapus pelanggan
+        res.status(200).send({
+            // Meta untuk respons JSON
+            meta: {
+                success: true,
+                message: "Pelanggan berhasil dihapus",
+            },
+        });
+
+    } catch (error) {
+        // Jika terjadi kesalahan, kirimkan respons dengan pesan error
+        res.status(500).send({
+            // Meta untuk respons JSON
+            meta: {
+                success: false,
+                message: "Terjadi kesalahan di server",
+            },
+            // Data error
+            errors: error,
+        });
+    }
+};
+
 // Mengekspor fungsi-fungsi untuk digunakan di modul lain
-module.exports = { findCustomers, createCustomer, findCustomerById, updateCustomer };
+module.exports = { findCustomers, createCustomer, findCustomerById, updateCustomer, deleteCustomer };
