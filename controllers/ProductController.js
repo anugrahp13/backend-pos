@@ -90,6 +90,51 @@ const findProducts = async (req, res) => {
     }
 };
 
+// Fungsi createProduct untuk membuat produk baru
+const createProduct = async (req, res) => {
+    try {
+        // Menyimpan data produk baru
+        const product = await prisma.product.create({
+            data: {
+                barcode: req.body.barcode,
+                title: req.body.title,
+                description: req.body.description,
+                buy_price: parseInt(req.body.buy_price),
+                sell_price: parseInt(req.body.sell_price),
+                stock: parseInt(req.body.stock),
+                image: req.file.path,
+                category_id: parseInt(req.body.category_id),
+            },
+            include: {
+                category: true,
+            }
+        });
+
+        // Mengirim respons
+        res.status(201).send({
+            //meta untuk respons JSON
+            meta: {
+                success: true,
+                message: "Produk berhasil dibuat",
+            },
+            //data produk
+            data: product,
+        });
+
+    } catch (error) {
+        // Mengirim respons jika terjadi kesalahan
+        res.status(500).send({
+            //meta untuk respons JSON
+            meta: {
+                success: false,
+                message: "Kesalahan internal server",
+            },
+            //data kesalahan
+            errors: error,
+        });
+    }
+};
+
 
 // Mengekspor fungsi-fungsi untuk digunakan di file lain
-module.exports = { findProducts };
+module.exports = { findProducts, createProduct };
