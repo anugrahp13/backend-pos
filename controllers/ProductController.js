@@ -135,6 +135,76 @@ const createProduct = async (req, res) => {
     }
 };
 
+// Fungsi findProductById untuk mengambil produk berdasarkan ID
+const findProductById = async (req, res) => {
+    // Mengambil ID dari parameter
+    const { id } = req.params;
+
+    try {
+        // Mengambil produk berdasarkan ID
+        const product = await prisma.product.findUnique({
+            where: {
+                id: Number(id),
+            },
+            select: {
+                id: true,
+                barcode: true,
+                title: true,
+                description: true,
+                buy_price: true,
+                sell_price: true,
+                stock: true,
+                image: true,
+                category_id: true,
+                created_at: true,
+                updated_at: true,
+                category: {
+                    select: {
+                        name: true,
+                        description: true,
+                        image: true,
+                        created_at: true,
+                        updated_at: true,
+                    },
+                },
+            }
+        });
+
+        if (!product) {
+            return res.status(404).send({
+                //meta untuk respons JSON
+                meta: {
+                    success: false,
+                    message: `Produk dengan ID: ${id} tidak ditemukan`,
+                },
+            });
+        }
+
+        // Mengirim respons
+        res.status(200).send({
+            //meta untuk respons JSON
+            meta: {
+                success: true,
+                message: `Berhasil mengambil produk dengan ID: ${id}`,
+            },
+            //data produk
+            data: product,
+        });
+
+    } catch (error) {
+        // Mengirim respons jika terjadi kesalahan
+        res.status(500).send({
+            //meta untuk respons JSON
+            meta: {
+                success: false,
+                message: "Kesalahan internal server",
+            },
+            //data kesalahan
+            errors: error,
+        });
+    }
+};
+
 
 // Mengekspor fungsi-fungsi untuk digunakan di file lain
-module.exports = { findProducts, createProduct };
+module.exports = { findProducts, createProduct, findProductById };
