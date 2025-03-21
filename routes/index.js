@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 
 // Import validators and middleware
-const { validateLogin, validateUser, validateCategory, validateProduct, validateCustomer } = require('../utils/validators');
+const { validateLogin, validateUser, validateCategory, validateProduct, validateCustomer, validateCart } = require('../utils/validators');
 const { handleValidationErrors, verifyToken, upload } = require('../middlewares');
 
 // Import controllers
@@ -55,6 +55,7 @@ const routes = [
 
   // Cart routes
   { method: 'get', path: '/carts', middlewares: [verifyToken], handler: cartController.findCarts },
+  { method: 'post', path: '/carts', middlewares: [verifyToken, validateCart, handleValidationErrors], handler: cartController.createCart },
 ];
 
 // Helper function to create routes
