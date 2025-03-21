@@ -116,5 +116,61 @@ const createCustomer = async (req, res) => {
   }
 };
 
+// Fungsi findCustomerById untuk mendapatkan pelanggan berdasarkan ID
+const findCustomerById = async (req, res) => {
+  // Mendapatkan ID dari parameter
+  const { id } = req.params;
+
+  try {
+    // Mendapatkan pelanggan berdasarkan ID
+    const customer = await prisma.customer.findUnique({
+      where: {
+        id: Number(id),
+      },
+      select: {
+        id: true,
+        name: true,
+        no_telp: true,
+        address: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    // Jika pelanggan tidak ditemukan, kirimkan respons 404
+    if (!customer) {
+      return res.status(404).send({
+        // Meta untuk respons JSON
+        meta: {
+          success: false,
+          message: `Pelanggan dengan ID: ${id} tidak ditemukan`,
+        },
+      });
+    }
+
+    // Mengirimkan respons setelah berhasil mendapatkan pelanggan berdasarkan ID
+    res.status(200).send({
+      // Meta untuk respons JSON
+      meta: {
+        success: true,
+        message: `Berhasil mendapatkan pelanggan dengan ID: ${id}`,
+      },
+      // Data pelanggan
+      data: customer,
+    });
+  } catch (error) {
+    // Jika terjadi kesalahan, kirimkan respons dengan pesan error
+    res.status(500).send({
+      // Meta untuk respons JSON
+      meta: {
+        success: false,
+        message: "Terjadi kesalahan di server",
+      },
+      // Data error
+      errors: error,
+    });
+  }
+};
+
 // Mengekspor fungsi-fungsi untuk digunakan di modul lain
-module.exports = { findCustomers, createCustomer };
+module.exports = { findCustomers, createCustomer, findCustomerById };
