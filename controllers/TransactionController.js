@@ -61,7 +61,7 @@ const createTransaction = async (req, res) => {
                     transaction_id: transaction.id,
                     product_id: cart.product_id,
                     qty: cart.qty,
-                    price: price,
+                    price: price, // Memperbaiki baris ini
                 },
             });
 
@@ -109,7 +109,91 @@ const createTransaction = async (req, res) => {
     }
 };
 
+// Fungsi findTransactionByInvoice
+const findTransactionByInvoice = async (req, res) => {
+    // Ambil ID dari parameter URL
+    const { invoice } = req.query;
+    
+    try {
+        // Ambil transaction berdasarkan ID
+        const transaction = await prisma.transaction.findFirst({
+            where: {
+                invoice: invoice,
+            },
+            select: {
+                id: true,
+                cashier_id: true,
+                customer_id: true,
+                invoice: true,
+                cash: true,
+                change: true,
+                discount: true,
+                grand_total: true,
+                created_at: true,
+                customer: {
+                    select: {
+                        name: true,
+                    },
+                },
+                cashier: {
+                    select: {
+                        name: true,
+                        created_at: true,
+                        updated_at: true,
+                    },
+                },
+                transaction_details: {
+                    select: {
+                        id: true,
+                        product_id: true,
+                        qty: true,
+                        price: true,
+                        product: {
+                            select: {
+                                title: true,
+                            },
+                        }
+                    },
+                },
+            },
+        });
+
+        if (!transaction) {
+            // Jika kategori tidak ditemukan, kirim respons 404
+            return res.status(404).send({
+                // meta untuk respons dalam format JSON
+                meta: {
+                    success: false,
+                    message: `Transaksi dengan Invoice: ${invoice} tidak ditemukan`,
+                },
+            });
+        }
+
+        // Kirim respons
+        res.status(200).send({
+            // meta untuk respons dalam format JSON
+            meta: {
+                success: true,
+                message: `Berhasil mendapatkan transaksi dengan Invoice: ${invoice}`,
+            },
+            // data transaksi
+            data: transaction,
+        });
+    } catch (error) {
+        // Jika terjadi kesalahan, kirim respons kesalahan internal server
+        res.status(500).send({
+            // meta untuk respons dalam format JSON
+            meta: {
+                success: false,
+                message: "Terjadi kesalahan di server",
+            },
+            // data kesalahan
+            errors: error,
+        });
+    }
+};
+
 // Mengekspor fungsi-fungsi untuk digunakan di file lain
 module.exports = {
-    createTransaction,
+    createTransaction, findTransactionByInvoice
 };
