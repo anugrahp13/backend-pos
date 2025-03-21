@@ -281,6 +281,69 @@ const updateProduct = async (req, res) => {
     }
 };
 
+// Fungsi deleteProduct untuk menghapus produk berdasarkan ID
+const deleteProduct = async (req, res) => {
+    // Mengambil ID dari parameter
+    const { id } = req.params;
+
+    try {
+        // Mengambil produk yang akan dihapus
+        const product = await prisma.product.findUnique({
+            where: {
+                id: Number(id),
+            },
+        });
+
+        if (!product) {
+            return res.status(404).send({
+                //meta untuk respons JSON
+                meta: {
+                    success: false,
+                    message: `Produk dengan ID: ${id} tidak ditemukan`,
+                },
+            });
+        }
+
+        // Menghapus produk
+        await prisma.product.delete({
+            where: {
+                id: Number(id),
+            },
+        });
+
+        // Menghapus gambar dari folder uploads jika ada
+        if (product.image) {
+            const imagePath = product.image;
+            const fileName = imagePath.substring(imagePath.lastIndexOf('/') + 1);
+            const filePath = `uploads/${fileName}`;
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
+
+        // Mengirim respons
+        res.status(200).send({
+            //meta untuk respons JSON
+            meta: {
+                success: true,
+                message: "Produk berhasil dihapus",
+            },
+        });
+
+    } catch (error) {
+        // Mengirim respons jika terjadi kesalahan
+        res.status(500).send({
+            //meta untuk respons JSON
+            meta: {
+                success: false,
+                message: "Kesalahan internal server",
+            },
+            //data kesalahan
+            errors: error,
+        });
+    }
+};
+
 
 // Mengekspor fungsi-fungsi untuk digunakan di file lain
-module.exports = { findProducts, createProduct, findProductById, updateProduct };
+module.exports = { findProducts, createProduct, findProductById, updateProduct, deleteProduct };
