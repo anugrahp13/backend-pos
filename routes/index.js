@@ -49,6 +49,7 @@ const routes = [
   { method: 'post', path: '/customers', middlewares: [verifyToken, validateCustomer, handleValidationErrors], handler: customerController.createCustomer },
   { method: 'get', path: '/customers/:id', middlewares: [verifyToken], handler: customerController.findCustomerById },
   { method: 'put', path: '/customers/:id', middlewares: [verifyToken, validateCustomer, handleValidationErrors], handler: customerController.updateCustomer },
+  { method: 'delete', path: '/customers/:id', middlewares: [verifyToken], handler: customerController.deleteCustomer },
 ];
 
 // Helper function to create routes
