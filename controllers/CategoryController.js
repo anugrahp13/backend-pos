@@ -4,6 +4,9 @@ const express = require("express");
 // Import prisma client
 const prisma = require("../prisma/client");
 
+// Import fs
+const fs = require("fs");
+
 // Fungsi findCategories dengan paginasi dan fitur pencarian
 const findCategories = async (req, res) => {
     try {
@@ -172,7 +175,73 @@ const findCategoryById = async (req, res) => {
     }
 };
 
+// Fungsi updateCategory
+const updateCategory = async (req, res) => {
+    // Ambil ID dari parameter URL
+    const { id } = req.params;
+
+    try {
+        // Update kategori dengan atau tanpa gambar
+        const dataCategory = {
+            name: req.body.name,
+            description: req.body.description,
+            updated_at: new Date(),
+        };
+
+        // Cek apakah ada gambar yang diupload
+        if (req.file) {
+
+            // Assign gambar ke data kategori
+            dataCategory.image = req.file.path;
+
+            // get category by id
+            const category = await prisma.category.findUnique({
+                where: {
+                    id: Number(id),
+                },
+            });
+
+            // Cek jika ada file gambar
+            if (category.image) {
+
+                // Hapus gambar lama
+                fs.unlinkSync(category.image);
+            }
+        }
+
+        // Lakukan update data kategori
+        const category = await prisma.category.update({
+            where: {
+                id: Number(id),
+            },
+            data: dataCategory,
+        });
+
+        // Kirim respons
+        res.status(200).send({
+            // meta untuk respons dalam format JSON
+            meta: {
+                success: true,
+                message: "Kategori berhasil diperbarui",
+            },
+            // data kategori yang diperbarui
+            data: category,
+        });
+    } catch (error) {
+        // Jika terjadi kesalahan, kirim respons kesalahan internal server
+        res.status(500).send({
+            // meta untuk respons dalam format JSON
+            meta: {
+                success: false,
+                message: "Terjadi kesalahan di server",
+            },
+            // data kesalahan
+            errors: error,
+        });
+    }
+};
+
 // Ekspor fungsi-fungsi agar dapat digunakan di tempat lain
 module.exports = {
-    findCategories, createCategory, findCategoryById
+    findCategories, createCategory, findCategoryById, updateCategory,
 };
