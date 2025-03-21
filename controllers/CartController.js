@@ -69,5 +69,103 @@ const findCarts = async (req, res) => {
     }
 };
 
+// Fungsi createCart
+const createCart = async (req, res) => {
+    try {
+        // Memeriksa apakah produk ada
+        const product = await prisma.product.findUnique({
+            where: {
+                id: parseInt(req.body.product_id),
+            },
+        });
+
+        if (!product) {
+            // Jika produk tidak ada, kembalikan error 404
+            return res.status(404).send({
+                meta: {
+                    success: false,
+                    message: `Produk dengan ID: ${req.body.product_id} tidak ditemukan`,
+                },
+            });
+        }
+
+        // Memeriksa apakah item keranjang dengan product_id dan cashier_id yang sama sudah ada
+        const existingCart = await prisma.cart.findFirst({
+            where: {
+                product_id: parseInt(req.body.product_id),
+                cashier_id: req.userId,
+            },
+        });
+
+        if (existingCart) {
+            // Jika item keranjang sudah ada, tambahkan jumlahnya
+            const updatedCart = await prisma.cart.update({
+                where: {
+                    id: existingCart.id,
+                },
+                data: {
+                    qty: existingCart.qty + parseInt(req.body.qty),
+                    price: product.sell_price * (existingCart.qty + parseInt(req.body.qty)),
+                    updated_at: new Date(),
+                },
+                include: {
+                    product: true,
+                    cashier: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            });
+
+            // Mengirimkan respon untuk keranjang yang diperbarui
+            return res.status(200).send({
+                meta: {
+                    success: true,
+                    message: "Jumlah keranjang berhasil diperbarui",
+                },
+                data: updatedCart,
+            });
+        } else {
+            // Jika item keranjang belum ada, buat yang baru
+            const cart = await prisma.cart.create({
+                data: {
+                    cashier_id: req.userId,
+                    product_id: parseInt(req.body.product_id),
+                    qty: parseInt(req.body.qty),
+                    price: product.sell_price * parseInt(req.body.qty),
+                },
+                include: {
+                    product: true,
+                    cashier: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            });
+
+            // Mengirimkan respon untuk keranjang yang baru dibuat
+            return res.status(201).send({
+                meta: {
+                    success: true,
+                    message: "Keranjang berhasil dibuat",
+                },
+                data: cart,
+            });
+        }
+    } catch (error) {
+        res.status(500).send({
+            meta: {
+                success: false,
+                message: "Terjadi kesalahan pada server",
+            },
+            errors: error,
+        });
+    }
+};
+
 // Mengekspor fungsi-fungsi untuk digunakan di file lain
-module.exports = { findCarts };
+module.exports = { findCarts, createCart };
