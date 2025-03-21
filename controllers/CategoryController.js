@@ -80,7 +80,43 @@ const findCategories = async (req, res) => {
     }
 };
 
+// Fungsi createCategory
+const createCategory = async (req, res) => {
+    try {
+        // Masukkan data kategori baru
+        const category = await prisma.category.create({
+            data: {
+                name: req.body.name,
+                description: req.body.description,
+                image: req.file.path,
+            },
+        });
+
+        // Kirim respons
+        res.status(201).send({
+            // meta untuk respons dalam format JSON
+            meta: {
+                success: true,
+                message: "Kategori berhasil dibuat",
+            },
+            // data kategori baru
+            data: category,
+        });
+    } catch (error) {
+        // Jika terjadi kesalahan, kirim respons kesalahan internal server
+        res.status(500).send({
+            // meta untuk respons dalam format JSON
+            meta: {
+                success: false,
+                message: "Terjadi kesalahan di server",
+            },
+            // data kesalahan
+            errors: error,
+        });
+    }
+};
+
 // Ekspor fungsi-fungsi agar dapat digunakan di tempat lain
 module.exports = {
-    findCategories
+    findCategories, createCategory
 };
