@@ -18,6 +18,7 @@ const cartController = require('../controllers/CartController');
 const transactionController = require('../controllers/TransactionController');
 const salesController = require('../controllers/SalesController');
 const profitController = require('../controllers/ProfitController');
+const dashboardController = require('../controllers/DashboardController');
 
 // Define routes
 const routes = [
@@ -72,6 +73,9 @@ const routes = [
   // Profit routes
   { method: 'get', path: '/profits', middlewares: [verifyToken, validateProfit, handleValidationErrors], handler: profitController.filterProfit },
   { method: 'get', path: '/profits/export', middlewares: [verifyToken, validateProfit, handleValidationErrors], handler: profitController.exportProfit },
+
+  // Dashboard routes
+  { method: 'get', path: '/dashboard', middlewares: [verifyToken], handler: dashboardController.getDashboardData },
 ];
 
 // Helper function to create routes
