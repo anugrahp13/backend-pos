@@ -414,6 +414,74 @@ const findProductByCategoryId = async (req, res) => {
     }
 };
 
+// Fungsi findProductByBarcode untuk mengambil produk berdasarkan barcode
+const findProductByBarcode = async (req, res) => {
+
+    try {
+        // Mengambil produk berdasarkan barcode
+        const product = await prisma.product.findMany({
+            where: {
+                barcode: req.body.barcode,
+            },
+            select: {
+                id: true,
+                barcode: true,
+                title: true,
+                description: true,
+                buy_price: true,
+                sell_price: true,
+                stock: true,
+                image: true,
+                category_id: true,
+                created_at: true,
+                updated_at: true,
+                category: {
+                    select: {
+                        name: true,
+                        description: true,
+                        image: true,
+                        created_at: true,
+                        updated_at: true,
+                    },
+                },
+            }
+        });
+
+        if (!product) {
+            return res.status(404).send({
+                //meta untuk respons JSON
+                meta: {
+                    success: false,
+                    message: `Produk dengan barcode: ${req.body.barcode} tidak ditemukan`,
+                },
+            });
+        }
+
+        // Mengirim respons
+        res.status(200).send({
+            //meta untuk respons JSON
+            meta: {
+                success: true,
+                message: `Berhasil mengambil produk dengan barcode: ${req.body.barcode}`,
+            },
+            //data produk
+            data: product,
+        });
+
+    } catch (error) {
+        // Mengirim respons jika terjadi kesalahan
+        res.status(500).send({
+            //meta untuk respons JSON
+            meta: {
+                success: false,
+                message: "Kesalahan internal server",
+            },
+            //data kesalahan
+            errors: error,
+        });
+    }
+};
+
 
 // Mengekspor fungsi-fungsi untuk digunakan di file lain
-module.exports = { findProducts, createProduct, findProductById, updateProduct, deleteProduct, findProductByCategoryId };
+module.exports = { findProducts, createProduct, findProductById, updateProduct, deleteProduct, findProductByCategoryId, findProductByBarcode };
