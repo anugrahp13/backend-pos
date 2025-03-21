@@ -304,7 +304,49 @@ const deleteCategory = async (req, res) => {
     }
 };
 
+// Fungsi allCategories
+const allCategories = async (req, res) => {
+    try {
+        // Ambil kategori 
+        const categories = await prisma.category.findMany({
+            select: {
+                id: true,
+                name: true,
+                image: true,
+                description: true,
+                created_at: true,
+                updated_at: true,
+            },
+            orderBy: {
+                id: "desc",
+            }
+        });
+
+        // Kirim respons
+        res.status(200).send({
+            // Meta untuk respons dalam format JSON
+            meta: {
+                success: true,
+                message: "Berhasil mendapatkan semua kategori",
+            },
+            // Data kategori
+            data: categories,
+        });
+    } catch (error) {
+        // Jika terjadi kesalahan, kirim respons kesalahan internal server
+        res.status(500).send({
+            // Meta untuk respons dalam format JSON
+            meta: {
+                success: false,
+                message: "Terjadi kesalahan di server",
+            },
+            // Data kesalahan
+            errors: error,
+        });
+    }
+};
+
 // Ekspor fungsi-fungsi agar dapat digunakan di tempat lain
 module.exports = {
-    findCategories, createCategory, findCategoryById, updateCategory, deleteCategory
+    findCategories, createCategory, findCategoryById, updateCategory, deleteCategory, allCategories
 };
