@@ -31,6 +31,7 @@ const routes = [
   { method: 'get', path: '/categories/:id', middlewares: [verifyToken], handler: categoryController.findCategoryById },
   { method: 'put', path: '/categories/:id', middlewares: [verifyToken, upload.single('image'), validateCategory, handleValidationErrors], handler: categoryController.updateCategory },
   { method: 'delete', path: '/categories/:id', middlewares: [verifyToken], handler: categoryController.deleteCategory },
+  { method: 'get', path: '/categories-all', middlewares: [verifyToken], handler: categoryController.allCategories },
 ];
 
 // Helper function to create routes
