@@ -167,5 +167,59 @@ const createCart = async (req, res) => {
     }
 };
 
+// Fungsi deleteCart
+const deleteCart = async (req, res) => {
+    // Mendapatkan ID dari params
+    const { id } = req.params;
+
+    try {
+        // Mendapatkan data keranjang yang akan dihapus
+        const cart = await prisma.cart.findUnique({
+            where: {
+                id: Number(id),
+                cashier_id: parseInt(req.userId),
+            },
+        });
+
+        if (!cart) {
+            return res.status(404).send({
+                // Meta untuk respon JSON
+                meta: {
+                    success: false,
+                    message: `Keranjang dengan ID: ${id} tidak ditemukan`,
+                },
+            });
+        }
+
+        // Menghapus keranjang
+        await prisma.cart.delete({
+            where: {
+                id: Number(id),
+                cashier_id: parseInt(req.userId),
+            },
+        });
+
+        // Mengirimkan respon
+        res.status(200).send({
+            // Meta untuk respon JSON
+            meta: {
+                success: true,
+                message: "Keranjang berhasil dihapus",
+            },
+        });
+
+    } catch (error) {
+        res.status(500).send({
+            // Meta untuk respon JSON
+            meta: {
+                success: false,
+                message: "Terjadi kesalahan pada server",
+            },
+            // Data kesalahan
+            errors: error,
+        });
+    }
+};
+
 // Mengekspor fungsi-fungsi untuk digunakan di file lain
-module.exports = { findCarts, createCart };
+module.exports = { findCarts, createCart, deleteCart };
